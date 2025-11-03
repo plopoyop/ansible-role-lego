@@ -1,0 +1,68 @@
+---
+- name: "Set lego command"
+  ansible.builtin.set_fact:
+    lego_command: >-
+      {{ lego_binary }} --email {{ lego_current_certificate.email }}
+      {{ '--dns ' + (lego_current_certificate.dns_provider | string) if lego_current_certificate.mode == 'dns' else '' }}
+      {{ '--http ' if lego_current_certificate.mode == 'http' else '' }}
+      {{ '--tls ' if lego_current_certificate.mode == 'tls' else '' }}
+      {% if lego_current_certificate.options is defined %}
+      {% for option_dict in lego_current_certificate.options %}
+      {% for option_key, option_value in option_dict.items() %}
+      {{ '--' + lego_current_certificate.mode | string + '.' + option_key | string + ' ' + option_value | string }}
+      {% endfor %}
+      {% endfor %}
+      {% endif %}
+      --domains {{ ' --domains '.join(lego_current_certificate.domains) }}
+      {{ '--accept-tos' if lego_accept_tos is defined and lego_accept_tos }}
+      {{ '--server ' + lego_staging_server if lego_current_certificate.staging | default(false) }}
+
+- name: "Request dns certificates"
+  ansible.builtin.command:
+    cmd: "{{ lego_command }} run {{ '--run-hook=\"' + lego_scripts_dir + '/' + lego_current_certificate.hook + '\"' if lego_current_certificate.hook else '' }}"
+    chdir: "{{ lego_base_dir }}"
+    creates: "{{ lego_base_dir }}/.lego/certificates/{{ lego_current_certificate.domains[0] }}.crt"
+  environment: "{{ lego_env | combine(lego_current_certificate.env) }}"
+
+- name: "Set certificate permissions"
+  ansible.builtin.file:
+    path: "{{ lego_base_dir }}/.lego/certificates/{{ lego_current_certificate.domains[0] }}.crt"
+    owner: "{{ lego_current_certificate.owner | default('root') }}"
+    group: "{{ lego_current_certificate.group | default('root') }}"
+    mode: "{{ lego_current_certificate.pubmode | default('0644') }}"
+
+- name: "Set key permissions"
+  ansible.builtin.file:
+    path: "{{ lego_base_dir }}/.lego/certificates/{{ lego_current_certificate.domains[0] }}.key"
+    owner: "{{ lego_current_certificate.owner | default('root') }}"
+    group: "{{ lego_current_certificate.group | default('root') }}"
+    mode: "{{ lego_current_certificate.privmode | default('0600') }}"
+
+- name: "Set issuer permissions"
+  ansible.builtin.file:
+    path: "{{ lego_base_dir }}/.lego/certificates/{{ lego_current_certificate.domains[0] }}.issuer.crt"
+    owner: "{{ lego_current_certificate.owner | default('root') }}"
+    group: "{{ lego_current_certificate.group | default('root') }}"
+    mode: "{{ lego_current_certificate.pubmode | default('0600') }}"
+
+- name: "Set json permissions"
+  ansible.builtin.file:
+    path: "{{ lego_base_dir }}/.lego/certificates/{{ lego_current_certificate.domains[0] }}.json"
+    owner: "{{ lego_current_certificate.owner | default('root') }}"
+    group: "{{ lego_current_certificate.group | default('root') }}"
+    mode: "{{ lego_current_certificate.pubmode | default('0600') }}"
+
+- name: "Create renew cronjob"
+  ansible.builtin.cron:
+    name: lego-dns-{{ lego_current_certificate.domains[0] }}-renew
+    job: >-
+      cd {{ lego_base_dir }} &&
+      {{ (lego_env | combine(lego_current_certificate.env)).keys() | zip((lego_env | combine(lego_current_certificate.env)).values())
+        | map('join', '=')
+        | join(' ')
+      }}
+      {{ lego_command }} renew
+      {{ '--run-hook="' + lego_scripts_dir + '/' + lego_current_certificate.hook + '"' if lego_current_certificate.hook else '' }}
+    hour: "{{ 24 | random(seed=inventory_hostname) }}"
+    minute: "{{ 60 | random(seed=inventory_hostname) }}"
+    state: "present"

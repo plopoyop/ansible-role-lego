@@ -33,3 +33,15 @@ tasks:
     cmds:
       - yamllint .
       - ansible-lint
+
+  test:
+    desc: "Run molecule tests"
+    deps:
+      - prepare
+    cmds:
+      - molecule test --all
+
+  gen-doc:
+    desc: "Generate readme"
+    cmds:
+      - ansible-doctor -f

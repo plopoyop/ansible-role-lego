@@ -1,0 +1,8 @@
+---
+- name: "Converge"
+  hosts: "all"
+  gather_facts: true
+  tasks:
+    - name: "Install lego role"
+      ansible.builtin.include_role:
+        name: "plopoyop.lego"

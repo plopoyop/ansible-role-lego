@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  namespace: "plopoyop"
+  role_name: "lego"
+  description: "Install & configure lego (https://go-acme.github.io/lego/)"
+  author: "Clément Hubert"
+
+  license: "MPL-2.0"
+
+  issue_tracker_url: "https://github.com/plopoyop/ansible-role-lego/issues"
+
+  min_ansible_version: "2.10"
+
+  platforms:
+    - name: "Debian"
+      versions:
+        - "trixie"
+        - "bookworm"
+
+  galaxy_tags:
+    - acme
+    - lego
+    - letsencrypt
+    - certificate
+
+dependencies: []

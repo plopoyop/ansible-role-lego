@@ -1,0 +1,41 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Gather the package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: "Check lego package is installed"
+      ansible.builtin.set_fact:
+        lego_package_check: "{{ ansible_facts.packages['lego'] | length }}"
+      changed_when: false
+      failed_when: false
+
+    - name: "Check lego base directory exists"
+      ansible.builtin.stat:
+        path: "{{ lego_base_dir | default('/etc/lego') }}"
+      register: "lego_base_dir_stat"
+
+    - name: "Check lego scripts directory exists"
+      ansible.builtin.stat:
+        path: "/etc/lego/scripts"
+      register: "lego_scripts_dir_stat"
+
+    - name: "Assert all conditions"
+      ansible.builtin.assert:
+        that:
+          - lego_package_check | int > 0
+          - lego_base_dir_stat.stat.exists
+          - lego_base_dir_stat.stat.isdir
+          - lego_base_dir_stat.stat.uid == 0
+          - lego_base_dir_stat.stat.gid == 0
+          - lego_base_dir_stat.stat.mode == "0755"
+          - lego_scripts_dir_stat.stat.exists
+          - lego_scripts_dir_stat.stat.isdir
+          - lego_scripts_dir_stat.stat.uid == 0
+          - lego_scripts_dir_stat.stat.gid == 0
+          - lego_scripts_dir_stat.stat.mode == "0700"
+        success_msg: "All lego role assertions passed!"
+        fail_msg: "Some lego role assertions failed! Check the output above."
