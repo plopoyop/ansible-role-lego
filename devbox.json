@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
+  "packages": [
+      "python312Packages.ansible@12.0.0",
+      "ansible-doctor@7.2.1",
+      "ansible-lint@25.4.0",
+      "git@latest",
+      "glibcLocales@latest",
+      "go-task@3.45.4",
+      "pre-commit@3.7.1",
+      "python312Packages.molecule@25.9.0",
+      "python312Packages.molecule-plugins@23.5.3",
+      "yamllint@1.37.1"
+    ]
+}
