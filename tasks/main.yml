@@ -1,0 +1,39 @@
+---
+# tasks file for lego
+- name: "Install lego"
+  ansible.builtin.package:
+    name: "lego"
+    state: "present"
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: "Create lego base directory"
+  ansible.builtin.file:
+    path: "{{ lego_base_dir }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: "Create lego scripts directory"
+  ansible.builtin.file:
+    path: "{{ lego_scripts_dir }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0700"
+
+- name: "Create hook script"
+  ansible.builtin.copy:
+    content: "{{ lego_current_script.content }}"
+    dest: "{{ lego_scripts_dir }}/{{ lego_current_script.name }}"
+    mode: "0700"
+  loop: "{{ lego_hook_scripts }}"
+  loop_control:
+    loop_var: "lego_current_script"
+
+- name: "Handle certificates"
+  ansible.builtin.include_tasks: "handle_certs.yml"
+  loop: "{{ lego_certificates }}"
+  loop_control:
+    loop_var: "lego_current_certificate"

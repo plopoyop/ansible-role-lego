@@ -1,0 +1,93 @@
+---
+# defaults file for lego
+# @var lego_binary
+# @var lego_binary:type: string
+# @var lego_binary:description: >
+# Lego binary path
+lego_binary: "/usr/bin/lego"
+
+# @var lego_base_dir
+# @var lego_base_dir:type: string
+# @var lego_base_dir:description: >
+# Lego config base directory
+lego_base_dir: "/etc/lego"
+
+# @var lego_accept_tos
+# @var lego_accept_tos:type: boolean
+# @var lego_accept_tos:description: >
+# Accept the Let's Encrypt Terms of Service
+lego_accept_tos: true
+
+# @var lego_staging_server
+# @var lego_staging_server:type: string
+# @var lego_staging_server:description: >
+# Let's Encrypt staging server
+lego_staging_server: "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+# @var lego_certificates
+# @var lego_certificates:type: list
+# @var lego_certificates:description: >
+# Lego certificates
+# @var lego_certificates:example: >
+# lego_certificates:
+#   - domains:
+#       - 'example.com'
+#       - '*.example.com'
+#     email: "user@example.com"
+#     mode: "dns"
+#     dns_provider: "myprovider"
+#     user: root
+#     group: caddy
+#     privmode: 0640
+#     pubmode: 0640
+#     hook: "caddy-certs.sh"
+#     env:
+#       ENV_FOR_PROVIDER: "value"
+#   - domains:
+#       - 'example.com'
+#       - 'www.example.com'
+#     email: "user@example.com"
+#     mode: "http"
+#     options:
+#       - webroot: "/var/www/html"
+#     user: root
+#     group: www-data
+#     privmode: 0640
+#     pubmode: 0640
+#     staging: true
+#   - domains:
+#       - 'example.com'
+#       - 'www.example.com'
+#     email: "user@example.com"
+#     mode: "tls"
+#     options:
+#       - port: 443
+#     user: root
+#     privmode: 0640
+#     pubmode: 0640
+#     staging: true
+lego_certificates: []
+
+# @var lego_hook_scripts
+# @var lego_hook_scripts:type: list
+# @var lego_hook_scripts:description: >
+# Lego hook scripts
+# @var lego_hook_scripts:example: >
+# lego_hook_scripts:
+#   - name: "caddy-certs.sh"
+#     content: |
+#       #!/bin/bash
+#       caddy_cert_dir="/etc/ssl/caddy"
+#       mkdir -p "$caddy_cert_dir"
+#       chown -R caddy:caddy "$caddy_cert_dir"
+
+#       install -o caddy -g caddy -m 0644 "$LEGO_CERT_PATH" "$caddy_cert_dir"
+#       install -o caddy -g caddy -m 0640 "$LEGO_CERT_KEY_PATH"  "$caddy_cert_dir"
+#       systemctl reload caddy
+lego_hook_scripts: []
+
+# @var lego_env
+# @var lego_env:type: dict
+# @var lego_env:description: >
+# Lego environment variables
+lego_env: {}

@@ -1,0 +1,2 @@
+---
+lego_scripts_dir: "{{ lego_base_dir }}/scripts"
